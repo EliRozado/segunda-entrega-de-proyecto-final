@@ -1,22 +1,21 @@
-import { query } from 'express';
-import admin from 'firebase-admin'
-import config from "../config.js"
-
-admin.initializeApp(config.firebase);
+import Config from '../config.js'
 
 class ContenedorFirebase {
     constructor(collection){
-        this.db = admin.firestore();
-        this.query = db.collection(collection)
+        this.db = Config.firebase;
+        this.collection = collection;
     }
 
     async getByID(id){
         try {
-            const doc = query.doc(`${id}`);
-            const elem = doc.get();
-            const response = elem.data();
+            const element = this.db.collection(this.collection).doc(id);
+            const doc = await element.get();
 
-            return response;
+            if(!doc.exists){
+                return 'El Documento no existe'
+            }else{
+                return {id: doc.id, ...doc.data()}
+            }            
         }catch(e){
             return console.log('No se encontro el documento')
         }
@@ -24,20 +23,11 @@ class ContenedorFirebase {
 
     async getAll(){
         try {
-            const querySnap = await this.query.get()
-            const docs = querySnap.docs;
+            const querySnapshot = await this.db.collection(this.collection).get();
 
-            const response = docs.map((doc) => ({
-                id: doc.id,
-                timestamp: doc.data().timestamp,
-                title: doc.data().title,
-                description: doc.data().description,
-                barcode: doc.data().barcode,
-                thumbnail: doc.data().thumbnail,
-                price: doc.data().price,
-                stock: doc.data().stock
-            }))
-            return response;
+            const data = querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+
+            return data;
         }catch(e){
             return console.log('No se pudieron obtener los datos de la database')
         }
@@ -45,24 +35,19 @@ class ContenedorFirebase {
 
     async save(newDoc){
         try {
-            let doc = query.doc();
-            
             newDoc.timestamp = Date.now();
-            await this.db.create(newDoc);
-
-            return doc;
+            await this.db.collection(this.collection).add(newDoc);
+            return newDoc;
         } catch(e){
             return console.log('Falló guardar el documento')
         }
     }
 
-    async update(elem){
+    async update(id, elem){
         try {
-            const doc = query.doc(`${id}`);
-            elem.timestamp = Date.now();
-            let item = await doc.update(elem);
+            const res = await this.db.collection(this.collection).doc(id).update({...elem});
 
-            return elem;
+            return res;
         } catch(e){
             return console.log('Documento no existe')
         }
@@ -70,30 +55,19 @@ class ContenedorFirebase {
 
     async delete(id){
         try {
-            const doc = query.doc(`${id}`);
-            const item = await doc.delete();
-            return console.log('Documento eliminado')
+            await this.db.collection(this.collection).doc(id).delete();
+            return 'Documento eliminado';
         } catch(e){
-            return console.log('El documento no existe')
+            return 'El documento no existe';
         }
     }
 
     async deleteAll(){
         try {
-            const querySnap = await this.query.get()
-            const docs = querySnap.docs;
-
-            const batchSize = querySnap.size;
-
-            if(batchSize === 0){
-                return console.log('Coleccion vacia')
-            }
-
-            const batch = this.db.batch();
-            querySnap.docs.forEach((doc) => {
-                batch.delete(doc.id)
-            });
-
+            this.db.collection(this.collection).listDocuments().then( doc => {
+                doc.map((val) => val.delete())
+            })
+            
             return console.log('La coleccion fue vaciada')
         } catch(e){
             return console.log('La coleccion estaba vacia o no existe')
@@ -101,4 +75,4 @@ class ContenedorFirebase {
     }
 }
 
-export default ContenedorMongo;
+export default ContenedorFirebase;

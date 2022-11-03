@@ -35,10 +35,11 @@ class ContenedorMongo {
         }
     }
 
-    async update(elem){
+    async update(id, elem){
         try {
             elem.timestamp = Date.now();
-            await this.db.findOneAndUpdate({_id: elem._id}, elem)
+            elem._id = id;
+            await this.db.findOneAndUpdate({_id: id}, elem)
             return elem;
         } catch(e){
             return console.log('Documento no existe')

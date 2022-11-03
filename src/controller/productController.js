@@ -1,4 +1,4 @@
-import productsCont from '../index.js';
+import { productsCont } from '../index.js';
 //const productsDB = './db/products.json'
 
 export const getProducts = async (req, res) => {
@@ -34,7 +34,6 @@ export const editProduct = async (req, res) => {
     const { title, description, barcode, thumbnail, price, stock } = req.body;
 
     const producto = {
-        _id: id,
         title: title,
         description: description,
         barcode: barcode,
@@ -43,7 +42,7 @@ export const editProduct = async (req, res) => {
         stock: stock
     }
 
-    await productsCont.update(producto)
+    await productsCont.update(id, producto)
 
     res.send(await productsCont.getAll())
 }

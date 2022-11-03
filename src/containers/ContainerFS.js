@@ -44,11 +44,12 @@ class ContenedorFS {
         return newDoc;
     }
 
-    update(elem){
+    update(id, elem){
         const data = this.processData();
-        const index = data.findIndex(doc => doc.id == elem.id);
+        const index = data.findIndex(doc => doc.id == id);
 
         elem.timestamp = Date.now()
+        elem.id = id;
         data[index] = elem;
 
         fs.writeFileSync(this.archivo, JSON.stringify(data, null, 2))

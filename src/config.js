@@ -1,5 +1,4 @@
-import admin from "firebase-admin";
-import serviceAccount from "../db/firebaseCred.js";
+import db from './firebase.js';
 
 const Config = {
     mongoDB: {
@@ -9,9 +8,7 @@ const Config = {
         }
     },
     fs: './db',
-    firebase: {
-        creditial: admin.credential.cert(serviceAccount)
-    }
+    firebase: db
 }
 
 export default Config;

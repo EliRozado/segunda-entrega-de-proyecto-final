@@ -1,37 +1,38 @@
-const { CartCont } = require('../containers/cartCont.js')
-const cartDB = './db/carts.json'
-const carts = new CartCont(cartDB)
+import { cartsCont } from '../index.js';
 
-const createCart= (req, res) => {
+//const cartDB = './db/carts.json'
+//const carts = new CartCont(cartDB)
+
+export const createCart= async (req, res) => {
     // * crea un carrito y devuelve su id
     const newCart = {
         products: []
     }
-    const id = carts.save(newCart);
+    const id = await cartsCont.save(newCart);
 
     res.send({id});
 }
 
-const deleteCart = (req, res) => {
+export const deleteCart = async (req, res) => {
     // * vacia un carrito y lo elimina
     const { id } = req.params;
     
-    const success = carts.deleteCartbyID(id);
+    const success = cartsCont.delete(id);
     console.log(id, success)
     res.send({success})
 }
 
-const getCartProducts = (req, res) => {
+export const getCartProducts = async (req, res) => {
     // * lista los productos guardados en el cart
     const { id } = req.params;
-    const products = carts.getCartProductsByID(id)
+    const products = await cartsCont.getCartProducts(id)
     res.send(products)
 }
 
-const addProductToCart = (req, res) => {
+export const addProductToCart = async (req, res) => {
     // * agrega un producto al carrito por id del producto
     const { id } = req.params;
-    const { id: id_prod, timestamp, title, description, barcode, thumbnail, price, stock } = req.body;
+    const { id: id_prod, title, description, barcode, thumbnail, price, stock } = req.body;
 
     const producto = {
         id: id_prod,
@@ -44,16 +45,16 @@ const addProductToCart = (req, res) => {
         stock: stock
     }
 
-    carts.addProductToCart(id, producto)
+    cartsCont.addProductToCart(id, producto)
     res.send({message: 'Producto agregado'})
 }
 
-const deleteProductFromCartList = (req, res) => {
+export const deleteProductFromCart = async (req, res) => {
     // * elimina un producto por su id de un carrito
     const { id, id_prod } = req.params;
 
-    const result = carts.deleteProductfromCart(id, id_prod);
-    res.send({message: result})
+    const result = await cartsCont.deleteProductFromCart(id, id_prod);
+    res.send({result})
 }
 
-module.exports={ createCart, deleteCart, getCartProducts, addProductToCart, deleteProductFromCartList }
+export default { createCart, deleteCart, getCartProducts, addProductToCart, deleteProductFromCart };

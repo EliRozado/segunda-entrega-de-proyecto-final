@@ -24,9 +24,10 @@ class ContenedorMemoria {
         return newDoc;
     }
 
-    update(elem){
-        const index = this.db.findIndex(doc => doc.id == elem.id);
+    update(id, elem){
+        const index = this.db.findIndex(doc => doc.id == id);
         elem.timestamp = Date.now();
+        elem.id = id;
         this.db[index] = elem;
         return elem
     }
